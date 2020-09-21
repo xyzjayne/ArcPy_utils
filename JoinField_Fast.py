@@ -19,18 +19,23 @@ def JoinField_Fast(in_table, in_field, join_table, join_field, fields= '*'):
     join_field_values = [x[0] for x in arcpy.da.TableToNumPyArray(join_table, join_field)]
 
     
+    assert isinstance(fields, str) or isinstance(fields, list)
     if fields == '*':
         field_list = [field.name for field in arcpy.ListFields(join_table) if field.name != join_field]
-    else: field_list = fields
+    elif isinstance(fields, str):
+        field_list = [fields]
+    elif isinstance(fields, list):
+        field_list = fields
     
     # make sure field doesn't already exist in in_table
     in_table_fields = [field.name for field in arcpy.ListFields(in_table)]
-    field_list_final = []
-    for field in field_list:
-        if field in in_table_fields:
-            field_list_final.append(field + '_1')
-        else:
-            field_list_final.append(field)
+    field_list_final = field_list
+#    field_list_final = []
+#    for field in field_list:
+#        if field in in_table_fields:
+#            field_list_final.append(field + '_1')
+#        else:
+#            field_list_final.append(field)
     
     field_type_dict = dict(zip([field.name for field in arcpy.ListFields(join_table)],
         [field.type for field in arcpy.ListFields(join_table)]))
@@ -63,11 +68,11 @@ def JoinField_Fast(in_table, in_field, join_table, join_field, fields= '*'):
                 values = []
                 for index in range(len(rec[1:])):
                     if field_type_dict[field_list[index]] == 'String':
-                        values.append( str(val or ''))
+                        values.append('')
                     elif field_type_dict[field_list[index]] == 'Double':
-                        values.append( float(val or 0))
+                        values.append(0)
                     elif field_type_dict[field_list[index]] == 'Integer':
-                        values.append( int(val or 0))
+                        values.append(0)
                     else:
                         values.append(0)
             rec[1:] = tuple(values)
